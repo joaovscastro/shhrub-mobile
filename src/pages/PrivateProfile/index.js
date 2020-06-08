@@ -45,22 +45,8 @@ import {
   ProfileAvatarTwo,
   BorraTrue,
   BorraTitleTrue,
-  ContainerPost,
-  HeaderPost,
-  TitlePost,
-  NewPostButtonPost,
-  CardYellowPost,
-  CardTitleLightPost,
-  CardFooterPost,
-  CardProfilePost,
-  CardNameLightPost,
-  PostButtonPost,
-  PostTitlePost,
-  BorraButtonPost,
-  BorraButtonPostTrue,
-  BorraTitlePost,
-  BorraTitlePostTrue,
-  ThemeTitlePost,
+  Disclaimer,
+  DisclaimerText,
 } from './styles';
 
 import Menu from '../../components/icons/Menu';
@@ -84,13 +70,13 @@ function PrivateProfile({ profile, navigation }) {
   const [refreshing, Setrefreshing] = useState(false);
 
   // load posts
-  async function loadNoticias(pageNumber = page, shouldRefresh = false) {
+  async function loadPosts(pageNumber = page, shouldRefresh = false) {
     if (total && pageNumber > total) return;
 
     Setloading(true);
 
     const responseNoticias = await api.get(
-      `wp/v2/posts?page=${pageNumber}&per_page=5&categories=1&_embed`
+      `wp/v2/posts?author=${profile.id}&page=${pageNumber}&per_page=5&_embed`
     );
 
     const totalItems = responseNoticias.headers['x-wp-totalpages'];
@@ -107,27 +93,16 @@ function PrivateProfile({ profile, navigation }) {
   }
 
   useEffect(() => {
-    loadNoticias();
+    loadPosts();
   }, []);
 
   async function refreshList() {
     Setrefreshing(true);
 
-    await loadNoticias(1, true);
+    await loadPosts(1, true);
 
     Setrefreshing(false);
   }
-
-  const FirstRoute = () => <View />;
-
-  const SecondRoute = () => <View />;
-
-  const renderScene = SceneMap({
-    first: FirstRoute,
-    second: SecondRoute,
-  });
-
-  const initialLayout = { width: Dimensions.get('window').width };
 
   function Sair() {
     Alert.alert(
@@ -147,18 +122,17 @@ function PrivateProfile({ profile, navigation }) {
     dispatch(signOut());
   }
 
-  handleNavigatePostProfile = (postsingle) => {
-    // navigation.navigate('PostSingle', { postsingle });
-
-    const pushAction = StackActions.push({
-      routeName: 'PostSingle',
-      params: {
-        postsingle,
-      },
-    });
-
-    navigation.dispatch(pushAction);
+  handleNavigatePostProfilePrivate = (postsingle) => {
+    navigation.push('PostSingle', { postsingle });
   };
+
+  const HeaderList = (
+    <Disclaimer>
+      <DisclaimerText>
+        Somente você pode visualizar seus posts anônimos.
+      </DisclaimerText>
+    </Disclaimer>
+  );
 
   return (
     <Container>
@@ -186,15 +160,31 @@ function PrivateProfile({ profile, navigation }) {
           </ProfileContent>
         </ProfileBox>
       </SafeAreaView>
-      <View>
+      <View style={{ marginLeft: 20, marginRight: 20, marginTop: 20 }}>
+        <Text
+          style={{
+            fontFamily: 'SF Pro Text',
+            fontWeight: 'normal',
+            fontSize: 13,
+            letterSpacing: 1,
+            color: '#ffffff',
+            textTransform: 'uppercase',
+            marginBottom: 20,
+          }}
+        >
+          Publicações
+        </Text>
+      </View>
+      <View style={{ flex: 1 }}>
         <FlatList
           style={{ marginBottom: 0 }}
           data={noticias}
           keyExtractor={(post) => String(post.id)}
-          onEndReached={() => loadNoticias()}
+          onEndReached={() => loadPosts()}
           onEndReachedThreshold={0.1}
           onRefresh={refreshList}
           refreshing={refreshing}
+          ListHeaderComponent={HeaderList}
           ListFooterComponent={
             loading && (
               <View>
@@ -204,10 +194,10 @@ function PrivateProfile({ profile, navigation }) {
           }
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
-            <View style={{ marginLeft: 20, marginRight: 20, marginTop: 20 }}>
+            <View style={{ marginLeft: 20, marginRight: 20 }}>
               <Card
                 style={{ backgroundColor: item.title.rendered }}
-                onPress={() => handleNavigatePostProfile(item)}
+                onPress={() => handleNavigatePostProfilePrivate(item)}
               >
                 <HTML
                   tagsStyles={{

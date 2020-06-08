@@ -71,24 +71,18 @@ function PublicProfile({ profile, navigation }) {
   const [refreshing, Setrefreshing] = useState(false);
 
   const [loadfriend, Setloadfriend] = useState(false);
-  const [friend, Setfriend] = useState([false]);
+  const [friend, Setfriend] = useState(false);
+  const [requestfriend, Setrequestfriend] = useState(false);
 
   // load posts
   async function loadPosts(pageNumber = page, shouldRefresh = false) {
     if (total && pageNumber > total) return;
 
     Setloading(true);
-    Setloadfriend(true);
 
     const responseNoticias = await api.get(
       `wp/v2/posts?author=${profilesingle.author}&tags=33&page=${pageNumber}&per_page=5&_embed`
     );
-
-    const responseFriend = await api.get(
-      `/buddypress/v1/members/${profilesingle.author}`
-    );
-
-    Setfriend(responseFriend.data);
 
     const totalItems = responseNoticias.headers['x-wp-totalpages'];
 
@@ -101,11 +95,11 @@ function PublicProfile({ profile, navigation }) {
     );
     Setpage(pageNumber + 1);
     Setloading(false);
-    Setloadfriend(false);
   }
 
   useEffect(() => {
     loadPosts();
+    checkFriend();
   }, []);
 
   async function refreshList() {
@@ -114,6 +108,23 @@ function PublicProfile({ profile, navigation }) {
     await loadPosts(1, true);
 
     Setrefreshing(false);
+  }
+
+  async function checkFriend() {
+    Setloadfriend(true);
+    const responseFriend = await api.get(
+      `/buddypress/v1/members/${profilesingle.author}`
+    );
+
+    try {
+      await api.get(`/buddypress/v1/friends/${profilesingle.author}`);
+      Setrequestfriend(true);
+    } catch (err) {
+      Setrequestfriend(false);
+    }
+
+    Setfriend(responseFriend.data);
+    Setloadfriend(false);
   }
 
   handleNavigatePostProfile = (postsingle) => {
@@ -129,7 +140,7 @@ function PublicProfile({ profile, navigation }) {
         friend_id: profilesingle.author,
       });
       Setloadfriend(false);
-      Alert.alert('Solicitação enviada', 'Agora é só aguardar (;');
+      Setrequestfriend(true);
     } catch (err) {
       Setloadfriend(false);
       Alert.alert('Ops..', 'Houve algum erro, tente novamente.');
@@ -179,9 +190,19 @@ function PublicProfile({ profile, navigation }) {
                           <ButtonFriendText>Olha eu aí</ButtonFriendText>
                         </ButtonFriend>
                       ) : (
-                        <AddFriendButton onPress={() => addFriend()}>
-                          <EditButtonText>Adicionar</EditButtonText>
-                        </AddFriendButton>
+                        <>
+                          {requestfriend ? (
+                            <AddFriendButton>
+                              <EditButtonText>
+                                Solicitação enviada
+                              </EditButtonText>
+                            </AddFriendButton>
+                          ) : (
+                            <AddFriendButton onPress={() => addFriend()}>
+                              <EditButtonText>Adicionar</EditButtonText>
+                            </AddFriendButton>
+                          )}
+                        </>
                       )}
                     </>
                   ) : (

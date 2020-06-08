@@ -204,3 +204,17 @@ export const MessageContent = styled.Text.attrs({
   font-size: 14px;
   margin: 0 10px;
 `;
+
+export const Disclaimer = styled.View`
+  border-radius: 4px;
+  padding: 5px;
+  margin: 0 20px 10px 20px;
+`;
+
+export const DisclaimerText = styled.Text`
+  font-family: 'SF Pro Text';
+  font-weight: normal;
+  color: #2aeaa9;
+  font-size: 10px;
+  text-align: center;
+`;

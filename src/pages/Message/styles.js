@@ -36,15 +36,17 @@ export const NewPostTitle = styled.Text`
 export const MessageBox = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;
-
-  background-color: #22272e;
-  padding: 20px;
-  margin: 10px 20px;
+  padding: 20px 20px;
+  border: 1px;
+  border-top-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: #42454b;
 `;
 
 export const MessageAvatar = styled.Image`
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 25px;
 `;
 
@@ -54,7 +56,7 @@ export const MessageContent = styled.Text.attrs({
   flex: 1;
   font-family: 'SF Pro Text';
   font-weight: normal;
-  color: #fff;
+  color: #eee;
   font-size: 14px;
   margin: 0 10px;
 `;

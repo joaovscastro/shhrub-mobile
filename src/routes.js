@@ -11,8 +11,10 @@ import Search from './pages/Search';
 import Groups from './pages/Groups';
 import GroupSingle from './pages/GroupSingle';
 import Message from './pages/Message';
+import MessageSingle from './pages/MessageSingle';
 import PrivateProfile from './pages/PrivateProfile';
 import PublicProfile from './pages/PublicProfile';
+import Friends from './pages/Friends';
 
 import Main from './pages/Main';
 import Login from './pages/Login';
@@ -141,6 +143,8 @@ export default (isSigned = false) =>
               screen: createStackNavigator(
                 {
                   Message,
+                  MessageSingle,
+                  Friends,
                 },
                 {
                   headerMode: 'none',
@@ -173,6 +177,8 @@ export default (isSigned = false) =>
               screen: createStackNavigator(
                 {
                   PrivateProfile,
+                  PostSingle,
+                  PublicProfile,
                 },
                 {
                   headerMode: 'none',

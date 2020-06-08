@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
 import {
   SafeAreaView,
   View,
   Dimensions,
   FlatList,
   ActivityIndicator,
+  Text,
 } from 'react-native';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 
@@ -21,11 +23,11 @@ import {
   MessageContent,
 } from './styles';
 
-import ArrowRight from '../../components/icons/ArrowRight';
+import ArrowRightGray from '../../components/icons/ArrowRightGray';
 
 import AvatarTeste from '../../../assets/img/avatar-teste.png';
 
-export default function Message() {
+function Message({ navigation, profile }) {
   const [loading, Setloading] = useState(false);
   const [noticias, Setnoticias] = useState([]);
   const [page, Setpage] = useState(1);
@@ -45,11 +47,12 @@ export default function Message() {
 
     Settotal(totalItems);
 
-    Setnoticias(
-      shouldRefresh
-        ? responseNoticias.data
-        : [...noticias, ...responseNoticias.data]
-    );
+    const data = responseNoticias.data.map((posts) => ({
+      ...posts,
+      dateFormatted: Object.keys(posts.recipients),
+    }));
+
+    Setnoticias(shouldRefresh ? data : [...noticias, ...data]);
     Setpage(pageNumber + 1);
     Setloading(false);
   }
@@ -66,13 +69,21 @@ export default function Message() {
     Setrefreshing(false);
   }
 
+  handleNavigateMessage = (messagesingle) => {
+    navigation.push('MessageSingle', { messagesingle });
+  };
+
+  handleNavigateFriends = () => {
+    navigation.push('Friends');
+  };
+
   return (
     <Container>
       <SafeAreaView style={{ flex: 1 }}>
         <Header>
           <Title>Mural</Title>
-          <NewPostButton>
-            <NewPostTitle>Nova mensagem</NewPostTitle>
+          <NewPostButton onPress={() => handleNavigateFriends()}>
+            <NewPostTitle>Amigos</NewPostTitle>
           </NewPostButton>
         </Header>
         <FlatList
@@ -93,10 +104,16 @@ export default function Message() {
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <View>
-              <MessageBox>
-                <MessageAvatar source={AvatarTeste} />
+              <MessageBox onPress={() => handleNavigateMessage(item)}>
+                <MessageAvatar
+                  source={{
+                    uri:
+                      item.recipients[item.dateFormatted[0]].user_avatars.thumb,
+                  }}
+                />
+
                 <MessageContent>{item.excerpt.rendered}</MessageContent>
-                <ArrowRight />
+                <ArrowRightGray />
               </MessageBox>
             </View>
           )}
@@ -105,3 +122,9 @@ export default function Message() {
     </Container>
   );
 }
+
+const mapStateToProps = (state) => ({
+  profile: state.user.profile,
+});
+
+export default connect(mapStateToProps)(Message);
