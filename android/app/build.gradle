@@ -129,7 +129,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.crushdesabafo"
+        applicationId "com.crush.android"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
