@@ -95,7 +95,7 @@ function CompleteProfile({ profile, navigation }) {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, marginBottom: 20 }}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Container>
           <Header>
