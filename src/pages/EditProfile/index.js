@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
-import moment from 'moment';
 import {
   SafeAreaView,
+  Alert,
   TouchableOpacity,
   ActivityIndicator,
-  Linking,
   ScrollView,
 } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
@@ -16,6 +15,7 @@ import {
   Title,
   Form,
   EmailInput,
+  PassInput,
   LoginButton,
   LoginButtonDisabled,
   LoginButtonText,
@@ -25,45 +25,23 @@ import {
   ChangePhotoText,
   Avatar,
   Label,
-  DateInput,
-  DisclaimerTwo,
 } from './styles';
+
+import ArrowBigLeftDark from '../../components/icons/ArrowBigLeftDark';
 
 import { updateProfileRequest } from '../../store/modules/user/actions';
 
-function CompleteProfile({ profile, navigation }) {
+function EditProfile({ profile, navigation }) {
   const loading = useSelector((state) => state.user.loading);
-  const profilenav = useSelector((state) => state.user.profilenav);
-
-  if (profilenav) {
-    navigation.navigate('Feed');
-  }
+  const [nome, Setnome] = useState(profile.name);
+  const [bio, Setbio] = useState(String(profile.meta.last_name));
+  const [insta, Setinsta] = useState(profile.url);
+  const [password, SetPassword] = useState('');
+  const [confirmpassword, SetConfirmpassword] = useState('');
 
   const [avatar, SetAvatar] = useState(profile.m_avatar);
   const [avatarsource, SetAvatarsource] = useState(profile.m_avatar);
   const [avatarupload, SetAvatarupload] = useState(profile.m_avatar);
-
-  const [nome, Setnome] = useState('');
-  const [instagram, Setinstagram] = useState('');
-  const [biografia, Setbiografia] = useState('');
-  const [nascimento, Setnascimento] = useState('');
-
-  const birthday = moment(nascimento, 'DD/MM/YYYY'),
-    age = moment().diff(birthday, 'years');
-
-  const options = {
-    title: 'Selecionar avatar',
-    cancelButtonTitle: 'Cancelar',
-    takePhotoButtonTitle: 'Tirar foto',
-    chooseFromLibraryButtonTitle: 'Escolher da biblioteca',
-    tintColor: '#0a84ff',
-    maxWidth: 100,
-    maxHeight: 100,
-    storageOptions: {
-      skipBackup: true,
-      path: 'images',
-    },
-  };
 
   function selecionaAvatar() {
     ImagePicker.openPicker({
@@ -82,24 +60,32 @@ function CompleteProfile({ profile, navigation }) {
   const dispatch = useDispatch();
 
   function handleSubmit() {
+    if (password != confirmpassword) {
+      Alert.alert('Erro ao atualizar', 'As senhas não coincidem');
+      return;
+    }
     dispatch(
       updateProfileRequest({
         id: profile.id,
         nome,
         avatarupload,
         avatarsource,
-        instagram,
-        biografia,
+        password,
+        biografia: bio,
+        instagram: insta,
       })
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#2B3239' }}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Container>
           <Header>
-            <Title>Completar perfil</Title>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <ArrowBigLeftDark />
+            </TouchableOpacity>
+            <Title>Editar perfil</Title>
           </Header>
 
           <ChangePhoto onPress={() => selecionaAvatar()}>
@@ -125,8 +111,8 @@ function CompleteProfile({ profile, navigation }) {
               keyboardType="default"
               autoCorrect={false}
               autoCapitalize="none"
-              value={biografia}
-              onChangeText={Setbiografia}
+              value={bio}
+              onChangeText={Setbio}
               placeholder="Fale um pouco de você (ou não)"
             />
             <Label>Diga ai seu insta</Label>
@@ -134,20 +120,32 @@ function CompleteProfile({ profile, navigation }) {
               keyboardType="default"
               autoCorrect={false}
               autoCapitalize="none"
-              value={instagram}
-              onChangeText={Setinstagram}
-              placeholder="Somente o usuário sem @"
+              value={insta}
+              onChangeText={Setinsta}
+              placeholder="Usuário sem o @"
             />
-            <Label>Data de nascimento</Label>
-            <DateInput
-              keyboardType="numeric"
-              type={'datetime'}
-              options={{
-                format: 'DD/MM/YYYY',
-              }}
-              value={nascimento}
-              onChangeText={Setnascimento}
-              placeholder="Sem mentir, hein?"
+            <Disclaimer>
+              Deixe os campos abaixo em branco para não atualizar.
+            </Disclaimer>
+            <Label>Senha</Label>
+            <PassInput
+              secureTextEntry
+              autoCorrect={false}
+              autoCapitalize="none"
+              returnKeyType="next"
+              value={password}
+              onChangeText={SetPassword}
+              placeholder="Crie uma senha"
+            />
+            <Label>Confirmar senha</Label>
+            <PassInput
+              secureTextEntry
+              autoCorrect={false}
+              autoCapitalize="none"
+              returnKeyType="go"
+              value={confirmpassword}
+              onChangeText={SetConfirmpassword}
+              placeholder="Confirme sua senha"
             />
 
             {loading ? (
@@ -156,41 +154,20 @@ function CompleteProfile({ profile, navigation }) {
               </LoginButtonDisabled>
             ) : (
               <>
-                {nome && nascimento ? (
+                {nome ? (
                   <>
-                    {age < 18 ? (
-                      <>
-                        <DisclaimerTwo>
-                          Ei, parece que você ainda é um baby!
-                        </DisclaimerTwo>
-                        <LoginButtonDisabled>
-                          <LoginButtonText>Continuar</LoginButtonText>
-                        </LoginButtonDisabled>
-                      </>
-                    ) : (
-                      <LoginButton onPress={handleSubmit}>
-                        <LoginButtonText>Continuar</LoginButtonText>
-                      </LoginButton>
-                    )}
+                    <LoginButton onPress={handleSubmit}>
+                      <LoginButtonText>Atualizar</LoginButtonText>
+                    </LoginButton>
                   </>
                 ) : (
                   <LoginButtonDisabled>
-                    <LoginButtonText>Continuar</LoginButtonText>
+                    <LoginButtonText>Atualizar</LoginButtonText>
                   </LoginButtonDisabled>
                 )}
               </>
             )}
           </Form>
-          <TouchableOpacity
-            onPress={() =>
-              Linking.openURL('https://privacidade.supercrush.com.br')
-            }
-          >
-            <Disclaimer>
-              Ao continuar você concorda com nossos termos.
-            </Disclaimer>
-            <Disclaimer>Toque aqui para acessar.</Disclaimer>
-          </TouchableOpacity>
         </Container>
       </ScrollView>
     </SafeAreaView>
@@ -201,4 +178,4 @@ const mapStateToProps = (state) => ({
   profile: state.user.profile,
 });
 
-export default connect(mapStateToProps)(CompleteProfile);
+export default connect(mapStateToProps)(EditProfile);

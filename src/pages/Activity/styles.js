@@ -46,77 +46,17 @@ export const MessageBox = styled.TouchableOpacity`
 `;
 
 export const MessageAvatar = styled.Image`
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 25px;
 `;
 
-export const MessageContent = styled.Text.attrs({
-  numberOfLines: 1,
-})`
-  flex: 1;
+export const MessageContent = styled.Text`
   font-family: 'SF Pro Text';
-  font-weight: normal;
-  color: #eee;
-  font-size: 14px;
-  margin: 0 10px;
-`;
-
-export const ButtonFriend = styled.TouchableOpacity`
-  border: 1px solid #2aeaa9;
-  padding: 10px 10px;
-  border-radius: 4px;
-`;
-
-export const ButtonFriendText = styled.Text`
-  font-family: 'SF Pro Text';
-  font-weight: normal;
-  color: #2aeaa9;
-  font-size: 12px;
-  text-align: center;
-`;
-
-export const ButtonFriendRequest = styled.TouchableOpacity`
-  padding: 8px 15px;
-  border-radius: 4px;
-`;
-
-export const ButtonFriendRequestText = styled.Text`
-  font-family: 'SF Pro Text';
-  font-weight: normal;
-  color: #7da0d6;
-  font-size: 13px;
-  text-align: center;
-`;
-
-export const ButtonFriendAccept = styled.TouchableOpacity`
-  border: 1px solid #d19076;
-  padding: 8px 15px;
-  border-radius: 4px;
-`;
-
-export const ButtonFriendAcceptText = styled.Text`
-  font-family: 'SF Pro Text';
-  font-weight: normal;
-  color: #d19076;
-  font-size: 13px;
-  text-align: center;
-`;
-
-export const ButtonFriendRemove = styled.TouchableOpacity`
-  border: 1px solid #e74c3c;
-  padding: 10px 10px;
-  border-radius: 4px;
-
-  margin: 0 5px 0 0;
-`;
-
-export const ButtonFriendRemoveText = styled.Text`
-  font-family: 'SF Pro Text';
-  font-weight: normal;
-  color: #e74c3c;
-  font-size: 12px;
-  text-align: center;
+  font-weight: bold;
+  color: #bbb;
+  font-size: 11px;
+  margin: 0 10px 5px 0;
 `;
 
 export const NewComentBox = styled.KeyboardAvoidingView.attrs({
@@ -162,12 +102,4 @@ export const InputComent = styled.TextInput.attrs({
   background-color: #2b3239;
   border-radius: 8px;
   margin-bottom: 20px;
-`;
-
-export const CheckText = styled.Text`
-  font-family: 'SF Pro Text';
-  font-weight: bold;
-  color: #ffff;
-  font-size: 13px;
-  text-align: center;
 `;

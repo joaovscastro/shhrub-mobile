@@ -16,6 +16,7 @@ export function* updateProfile({ payload }) {
       instagram,
       biografia,
       nascimento,
+      email,
     } = payload.data;
 
     if (avatarupload != avatarsource) {
@@ -24,11 +25,25 @@ export function* updateProfile({ payload }) {
       });
     }
 
+    if (password === '') {
+      const response = yield call(api.put, `/wp/v2/users/${id}`, {
+        name: nome,
+        description: nome,
+        first_name: nome,
+        last_name: biografia,
+        url: `instagram.com/${instagram}`,
+      });
+
+      yield put(updateProfileSuccess(response.data));
+      return;
+    }
+
     const response = yield call(api.put, `/wp/v2/users/${id}`, {
       name: nome,
       description: nome,
       first_name: nome,
       last_name: biografia,
+      password: password,
       url: `instagram.com/${instagram}`,
     });
 

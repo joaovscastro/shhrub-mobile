@@ -39,7 +39,6 @@ import {
   CardFooterPost,
   CardProfilePost,
   CardNameLightPost,
-  PostButtonPost,
   BorraButtonPost,
   BorraButtonPostTrue,
   BorraTitlePost,

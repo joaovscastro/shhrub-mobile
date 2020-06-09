@@ -12,7 +12,9 @@ export const Header = styled.View`
   align-items: center;
 `;
 
-export const Title = styled.Text`
+export const Title = styled.Text.attrs({
+  numberOfLines: 1,
+})`
   flex: 1;
 
   font-family: 'SF Pro Text';

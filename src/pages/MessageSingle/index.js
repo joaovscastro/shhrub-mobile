@@ -75,6 +75,14 @@ function MessageSingle({ navigation, profile }) {
 
   useEffect(() => {
     loadPosts();
+    const navFocusListener = navigation.addListener('didFocus', () => {
+      // API_CALL();
+      loadPosts();
+    });
+
+    return () => {
+      navFocusListener.remove();
+    };
   }, []);
 
   async function refreshList() {
@@ -156,7 +164,6 @@ function MessageSingle({ navigation, profile }) {
                   }}
                 />
                 <View>
-                  <MessageContent>06/06/2020</MessageContent>
                   <HTML
                     ignoredTags={[
                       ...IGNORED_TAGS,

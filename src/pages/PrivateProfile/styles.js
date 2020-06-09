@@ -97,7 +97,7 @@ export const BioText = styled.Text.attrs({
   margin: 5px 0;
 `;
 
-export const Card = styled.TouchableOpacity`
+export const Card = styled.View`
   border-radius: 8px;
   padding: 25px;
   margin-bottom: 20px;
@@ -216,5 +216,21 @@ export const DisclaimerText = styled.Text`
   font-weight: normal;
   color: #2aeaa9;
   font-size: 10px;
+  text-align: center;
+`;
+
+export const ButtonFriendRemove = styled.TouchableOpacity`
+  border: 1px solid #e74c3c;
+  padding: 10px 10px;
+  border-radius: 4px;
+
+  margin: 0 5px 0 0;
+`;
+
+export const ButtonFriendRemoveText = styled.Text`
+  font-family: 'SF Pro Text';
+  font-weight: normal;
+  color: #e74c3c;
+  font-size: 12px;
   text-align: center;
 `;

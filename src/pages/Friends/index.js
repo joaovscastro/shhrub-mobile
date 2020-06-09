@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import {
   SafeAreaView,
   View,
-  Dimensions,
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
@@ -12,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
+import Lottie from 'lottie-react-native';
 
 import api from '../../services/api';
 
@@ -19,8 +19,6 @@ import {
   Container,
   Header,
   Title,
-  NewPostButton,
-  NewPostTitle,
   MessageBox,
   MessageAvatar,
   MessageContent,
@@ -37,14 +35,16 @@ import {
   PostButtonDisabled,
   PostTitle,
   InputComent,
+  CheckText,
 } from './styles';
 
-import ArrowRightGray from '../../components/icons/ArrowRightGray';
 import ArrowBigLeftDark from '../../components/icons/ArrowBigLeftDark';
-import AvatarTeste from '../../../assets/img/avatar-teste.png';
+import FriendIcon from '../../components/icons/FriendIcon';
+import Check from '../../../assets/animation/check.json';
 
 function Friends({ navigation, profile }) {
   const [loading, Setloading] = useState(false);
+  const [loadingadd, Setloadingadd] = useState(false);
   const [noticias, Setnoticias] = useState([]);
   const [page, Setpage] = useState(1);
   const [total, Settotal] = useState(0);
@@ -54,7 +54,9 @@ function Friends({ navigation, profile }) {
   const [isModalVisible, setisModalVisible] = useState(false);
   const [comment, Setcomment] = useState('');
   const [loadpost, Setloadpost] = useState(false);
-  const [idusuario, Setidusuario] = useState();
+  const [check, Setcheck] = useState(false);
+  const [idfriend, Setidfriend] = useState();
+  const [idinitiator, Setidinitiator] = useState();
 
   async function loadPosts(pageNumber = page, shouldRefresh = false) {
     if (total && pageNumber > total) return;
@@ -95,21 +97,28 @@ function Friends({ navigation, profile }) {
   };
 
   async function aceitarAmizade(amizadeid) {
+    Setloadingadd(true);
     await api.put(`buddypress/v1/friends/${amizadeid}`);
+    Setloadingadd(false);
+    await loadPosts(1, true);
   }
 
-  toggleModalOpen = (userid) => {
-    Setidusuario(userid);
-    console.log(userid);
+  toggleModalOpen = (friendid, initiatorid) => {
+    Setidfriend(friendid);
+    Setidinitiator(initiatorid);
     setisModalVisible(true);
   };
 
   toggleModal = () => {
     setisModalVisible(false);
+    Setcheck(false);
   };
 
   async function removerSolicitacao(idamizade) {
+    Setloadingadd(true);
     await api.delete(`buddypress/v1/friends/${idamizade}`);
+    Setloadingadd(false);
+    await loadPosts(1, true);
   }
 
   async function removerAmizade(idamizadeuser) {
@@ -123,16 +132,16 @@ function Friends({ navigation, profile }) {
     try {
       await api.post('/buddypress/v1/messages', {
         message: comment,
-        recipients: [idusuario, profile.id],
+        recipients: [idfriend, idinitiator],
         sender_id: profile.id,
       });
-      setisModalVisible(false);
+      Setcheck(true);
       Setcomment('');
     } catch (err) {
       Alert.alert('Ops..', 'Houve algum erro, tente novamente.');
     }
     Setloadpost(false);
-    Alert.alert('Mensagem enviada', 'Aguarde seu amigo responder.');
+    navigation.goBack();
   }
 
   return (
@@ -192,7 +201,9 @@ function Friends({ navigation, profile }) {
                     {item.is_confirmed ? (
                       <>
                         <ButtonFriend
-                          onPress={() => toggleModalOpen(item.friend_id)}
+                          onPress={() =>
+                            toggleModalOpen(item.friend_id, item.initiator_id)
+                          }
                         >
                           <ButtonFriendText>Mensagem</ButtonFriendText>
                         </ButtonFriend>
@@ -210,33 +221,67 @@ function Friends({ navigation, profile }) {
                     {item.is_confirmed ? (
                       <>
                         <ButtonFriend
-                          onPress={() => toggleModalOpen(item.friend_id)}
+                          onPress={() =>
+                            toggleModalOpen(item.friend_id, item.initiator_id)
+                          }
                         >
                           <ButtonFriendText>Mensagem</ButtonFriendText>
                         </ButtonFriend>
                       </>
                     ) : (
                       <>
-                        <ButtonFriendRemove
-                          onPress={() => removerSolicitacao(item.initiator_id)}
-                        >
-                          <ButtonFriendRemoveText>
-                            Remover
-                          </ButtonFriendRemoveText>
-                        </ButtonFriendRemove>
-                        <ButtonFriendAccept
-                          onPress={() => aceitarAmizade(item.initiator_id)}
-                        >
-                          <ButtonFriendAcceptText>
-                            Aceitar
-                          </ButtonFriendAcceptText>
-                        </ButtonFriendAccept>
+                        {loadingadd ? (
+                          <ActivityIndicator color="#fff" size={25} />
+                        ) : (
+                          <>
+                            <ButtonFriendRemove
+                              onPress={() =>
+                                removerSolicitacao(item.initiator_id)
+                              }
+                            >
+                              <ButtonFriendRemoveText>
+                                Remover
+                              </ButtonFriendRemoveText>
+                            </ButtonFriendRemove>
+                            <ButtonFriendAccept
+                              onPress={() => aceitarAmizade(item.initiator_id)}
+                            >
+                              <ButtonFriendAcceptText>
+                                Aceitar
+                              </ButtonFriendAcceptText>
+                            </ButtonFriendAccept>
+                          </>
+                        )}
                       </>
                     )}
                   </>
                 )}
               </MessageBox>
             </View>
+          )}
+          ListEmptyComponent={() => (
+            <>
+              <View
+                style={{
+                  alignItems: 'center',
+                  marginTop: 20,
+                  marginBottom: 20,
+                }}
+              >
+                <FriendIcon />
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontFamily: 'SF Pro Text',
+                    fontWeight: 'normal',
+                    fontSize: 14,
+                    marginTop: 10,
+                  }}
+                >
+                  Nenhuma amigo
+                </Text>
+              </View>
+            </>
           )}
         />
       </SafeAreaView>
@@ -246,6 +291,25 @@ function Friends({ navigation, profile }) {
         style={{ justifyContent: 'flex-end', margin: 0 }}
       >
         <NewComentBox>
+          {check ? (
+            <View style={{ alignItems: 'center', marginBottom: 20 }}>
+              <Lottie
+                resizeMode="contain"
+                autoSize
+                source={Check}
+                autoPlay
+                loop={false}
+                style={{
+                  width: 80,
+                  height: 80,
+                }}
+              />
+              <CheckText>Mensagem enviada</CheckText>
+            </View>
+          ) : (
+            <View />
+          )}
+
           <ScrollView showsVerticalScrollIndicator={false}>
             <InputComent
               placeholder="Digite sua mensagem"

@@ -20,7 +20,7 @@ export const CardFooter = styled.View`
   flex-direction: row;
 `;
 
-export const CardProfile = styled.TouchableOpacity`
+export const CardProfile = styled.View`
   flex: 1;
 
   flex-direction: row;

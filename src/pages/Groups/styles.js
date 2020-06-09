@@ -49,7 +49,9 @@ export const GroupCover = styled.Image`
   height: 180px;
 `;
 
-export const GroupTitle = styled.Text`
+export const GroupTitle = styled.Text.attrs({
+  numberOfLines: 1,
+})`
   font-family: 'SF Pro Text';
   font-weight: 600;
   color: #fff;

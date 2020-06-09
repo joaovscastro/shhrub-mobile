@@ -61,7 +61,6 @@ import ArrowBigLeftDark from '../../components/icons/ArrowBigLeftDark';
 
 function PublicProfile({ profile, navigation }) {
   // Buscar notícia props
-  console.log(profile.id);
   const profilesingle = navigation.getParam('profilesingle');
 
   const [loading, Setloading] = useState(false);
@@ -161,14 +160,16 @@ function PublicProfile({ profile, navigation }) {
           />
           <ProfileContent>
             <ProfileNameBox>
-              <ProfileName>{profilesingle.author_name}</ProfileName>
+              <ProfileName>
+                {profilesingle._embedded['author'][0].name}
+              </ProfileName>
               {profilesingle._embedded['author'][0].acf.verified === 'yes' ? (
                 <VerifiedSealBig />
               ) : (
                 <View />
               )}
             </ProfileNameBox>
-            <BioText>{profilesingle.meta.last_name}</BioText>
+
             <ProfileButtonsBox>
               <InstaButton
                 onPress={() =>
@@ -194,7 +195,7 @@ function PublicProfile({ profile, navigation }) {
                           {requestfriend ? (
                             <AddFriendButton>
                               <EditButtonText>
-                                Solicitação enviada
+                                Solicitação pendente
                               </EditButtonText>
                             </AddFriendButton>
                           ) : (

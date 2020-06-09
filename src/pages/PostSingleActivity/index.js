@@ -3,12 +3,9 @@ import {
   View,
   ScrollView,
   Text,
-  Image,
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
-  TextInput,
-  SafeAreaView,
   Alert,
 } from 'react-native';
 import HTML from 'react-native-render-html';
@@ -45,7 +42,7 @@ import ArrowBigLeft from '../../components/icons/ArrowBigLeft';
 import VerifiedSeal from '../../components/icons/VerifiedSeal';
 import Calmo from '../../../assets/animation/calmo.json';
 
-export default function PostSingle({ navigation }) {
+export default function PostSingleActivity({ navigation }) {
   // Buscar notícia props
   const postsingle = navigation.getParam('postsingle');
 
@@ -68,7 +65,7 @@ export default function PostSingle({ navigation }) {
     Setloading(true);
 
     const responseComments = await api.get(
-      `wp/v2/comments?post=${postsingle.id}&page=${pageNumber}&per_page=10&_embed`
+      `wp/v2/comments?post=${postsingle._embedded['up'][0].id}&page=${pageNumber}&per_page=10&_embed`
     );
 
     const totalItems = responseComments.headers['x-wp-totalpages'];
@@ -108,10 +105,6 @@ export default function PostSingle({ navigation }) {
     navigation.push('PublicProfile', { profilesingle });
   };
 
-  handleNavigateProfileCard = (profilesingle) => {
-    navigation.push('PublicProfile', { profilesingle });
-  };
-
   async function postComment() {
     Setloadpost(true);
     try {
@@ -144,7 +137,7 @@ export default function PostSingle({ navigation }) {
 
   async function letEstado() {
     const responseComments = await api.get(
-      `wp/v2/comments?post=${postsingle.id}&page=1&per_page=10&_embed`
+      `wp/v2/comments?post=${postsingle._embedded['up'][0].id}&page=1&per_page=10&_embed`
     );
 
     Setcomments(responseComments.data);
@@ -152,7 +145,11 @@ export default function PostSingle({ navigation }) {
 
   const HeaderList = (
     <View>
-      <Card style={{ backgroundColor: postsingle.title.rendered }}>
+      <Card
+        style={{
+          backgroundColor: postsingle._embedded['up'][0].title.rendered,
+        }}
+      >
         <TouchableOpacity
           style={{ marginBottom: 20 }}
           onPress={() => navigation.goBack()}
@@ -171,10 +168,10 @@ export default function PostSingle({ navigation }) {
               marginBottom: 25,
             },
           }}
-          html={postsingle.content.rendered}
+          html={postsingle._embedded['up'][0].excerpt.rendered}
         />
         <CardFooter>
-          <CardProfile onPress={() => handleNavigateProfileCard(postsingle)}>
+          <CardProfile>
             {postsingle.format === 'quote' ? (
               <BorraTrue>
                 <BorraTitleTrue>Nome borrado</BorraTitleTrue>
@@ -182,7 +179,9 @@ export default function PostSingle({ navigation }) {
             ) : (
               <>
                 <ProfileAvatar
-                  source={{ uri: postsingle._embedded['author'][0].m_avatar }}
+                  source={{
+                    uri: postsingle._embedded['author'][0].avatar_urls[48],
+                  }}
                 />
                 <CardNameLight>
                   {postsingle._embedded['author'][0].name}

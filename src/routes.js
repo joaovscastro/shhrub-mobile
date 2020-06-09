@@ -15,6 +15,10 @@ import MessageSingle from './pages/MessageSingle';
 import PrivateProfile from './pages/PrivateProfile';
 import PublicProfile from './pages/PublicProfile';
 import Friends from './pages/Friends';
+import EditProfile from './pages/EditProfile';
+import More from './pages/More';
+import Activity from './pages/Activity';
+import PostSingleActivity from './pages/PostSingleActivity';
 
 import Main from './pages/Main';
 import Login from './pages/Login';
@@ -179,6 +183,10 @@ export default (isSigned = false) =>
                   PrivateProfile,
                   PostSingle,
                   PublicProfile,
+                  EditProfile,
+                  More,
+                  Activity,
+                  PostSingleActivity,
                 },
                 {
                   headerMode: 'none',

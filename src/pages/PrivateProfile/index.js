@@ -47,6 +47,8 @@ import {
   BorraTitleTrue,
   Disclaimer,
   DisclaimerText,
+  ButtonFriendRemove,
+  ButtonFriendRemoveText,
 } from './styles';
 
 import Menu from '../../components/icons/Menu';
@@ -55,19 +57,18 @@ import AvatarTeste from '../../../assets/img/avatar-teste.png';
 import Insta from '../../../assets/img/instaicon.png';
 import CommentBubble from '../../components/icons/CommentBubble';
 import Calmo from '../../../assets/animation/calmo.json';
+import RemoveIcon from '../../components/icons/Remove';
+import NotifyIcon from '../../components/icons/NotifyIcon';
+NotifyIcon;
 
 function PrivateProfile({ profile, navigation }) {
-  const [index, setIndex] = useState(0);
-  const [routes] = useState([
-    { key: 'first', title: 'Atividades' },
-    { key: 'second', title: 'Publicações' },
-  ]);
-
   const [loading, Setloading] = useState(false);
   const [noticias, Setnoticias] = useState([]);
   const [page, Setpage] = useState(1);
   const [total, Settotal] = useState(0);
   const [refreshing, Setrefreshing] = useState(false);
+
+  const [loadingdelete, Setloadingdelete] = useState(false);
 
   // load posts
   async function loadPosts(pageNumber = page, shouldRefresh = false) {
@@ -94,6 +95,14 @@ function PrivateProfile({ profile, navigation }) {
 
   useEffect(() => {
     loadPosts();
+    const navFocusListener = navigation.addListener('didFocus', () => {
+      // API_CALL();
+      loadPosts();
+    });
+
+    return () => {
+      navFocusListener.remove();
+    };
   }, []);
 
   async function refreshList() {
@@ -104,26 +113,40 @@ function PrivateProfile({ profile, navigation }) {
     Setrefreshing(false);
   }
 
-  function Sair() {
+  function deletarPost(idpost) {
     Alert.alert(
-      'Deseja realmente sair?',
-      'Você será desconectado',
-      [
-        { text: 'Não', onPress: () => navigation.goBack() },
-        { text: 'Sim', onPress: () => handleLogout() },
-      ],
+      'Deseja realmente excluir?',
+      'O post será excluído',
+      [{ text: 'Não' }, { text: 'Sim', onPress: () => deletePost(idpost) }],
       { cancelable: false }
     );
   }
 
-  const dispatch = useDispatch();
+  async function deletePost(idpost) {
+    Setloadingdelete(true);
+    await api.delete(`/wp/v2/posts/${idpost}`);
+    const responsePosts = await api.get(
+      `wp/v2/posts?author=${profile.id}&per_page=5&_embed`
+    );
 
-  function handleLogout() {
-    dispatch(signOut());
+    Setnoticias(responsePosts.data);
+    Setloadingdelete(false);
   }
 
   handleNavigatePostProfilePrivate = (postsingle) => {
     navigation.push('PostSingle', { postsingle });
+  };
+
+  handleNavigateEditProfile = () => {
+    navigation.push('EditProfile');
+  };
+
+  handleNavigateMore = () => {
+    navigation.push('More');
+  };
+
+  handleNavigateActivity = () => {
+    navigation.push('Activity');
   };
 
   const HeaderList = (
@@ -139,7 +162,15 @@ function PrivateProfile({ profile, navigation }) {
       <SafeAreaView>
         <Header>
           <Title>Perfil</Title>
-          <Menu />
+          <TouchableOpacity
+            onPress={() => handleNavigateActivity()}
+            style={{ marginRight: 25 }}
+          >
+            <NotifyIcon />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleNavigateMore()}>
+            <Menu />
+          </TouchableOpacity>
         </Header>
         <ProfileBox>
           <ProfileAvatar source={{ uri: profile.m_avatar }} />
@@ -153,7 +184,7 @@ function PrivateProfile({ profile, navigation }) {
               <InstaButton onPress={() => Linking.openURL(profile.url)}>
                 <InstaIcon source={Insta} />
               </InstaButton>
-              <EditButton onPress={Sair}>
+              <EditButton onPress={() => handleNavigateEditProfile()}>
                 <EditButtonText>Editar perfil</EditButtonText>
               </EditButton>
             </ProfileButtonsBox>
@@ -195,46 +226,63 @@ function PrivateProfile({ profile, navigation }) {
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <View style={{ marginLeft: 20, marginRight: 20 }}>
-              <Card
-                style={{ backgroundColor: item.title.rendered }}
-                onPress={() => handleNavigatePostProfilePrivate(item)}
-              >
-                <HTML
-                  tagsStyles={{
-                    p: {
-                      fontFamily: 'SF Pro Text',
-                      fontWeight: '600',
-                      color: '#060606',
-                      fontSize: 16,
-                      marginBottom: 25,
-                    },
+              <Card style={{ backgroundColor: item.title.rendered }}>
+                <View
+                  style={{
+                    alignItems: 'flex-end',
                   }}
-                  html={item.content.rendered}
-                />
-                <CardFooter>
-                  <CardProfile>
-                    {item.format === 'quote' ? (
-                      <BorraTrue>
-                        <BorraTitleTrue>Nome borrado</BorraTitleTrue>
-                      </BorraTrue>
-                    ) : (
-                      <>
-                        <ProfileAvatarTwo
-                          source={{ uri: item._embedded['author'][0].m_avatar }}
-                        />
-                        <CardNameLight>
-                          {item._embedded['author'][0].name}
-                        </CardNameLight>
-                        {item._embedded['author'][0].acf.verified === 'yes' ? (
-                          <VerifiedSeal />
-                        ) : (
-                          <View />
-                        )}
-                      </>
-                    )}
-                  </CardProfile>
-                  <CommentBubble />
-                </CardFooter>
+                >
+                  {loadingdelete ? (
+                    <ActivityIndicator color="#000" size={25} />
+                  ) : (
+                    <TouchableOpacity onPress={() => deletarPost(item.id)}>
+                      <RemoveIcon />
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <TouchableOpacity
+                  onPress={() => handleNavigatePostProfilePrivate(item)}
+                >
+                  <HTML
+                    tagsStyles={{
+                      p: {
+                        fontFamily: 'SF Pro Text',
+                        fontWeight: '600',
+                        color: '#060606',
+                        fontSize: 16,
+                        marginBottom: 25,
+                      },
+                    }}
+                    html={item.content.rendered}
+                  />
+                  <CardFooter>
+                    <CardProfile>
+                      {item.format === 'quote' ? (
+                        <BorraTrue>
+                          <BorraTitleTrue>Nome borrado</BorraTitleTrue>
+                        </BorraTrue>
+                      ) : (
+                        <>
+                          <ProfileAvatarTwo
+                            source={{
+                              uri: item._embedded['author'][0].m_avatar,
+                            }}
+                          />
+                          <CardNameLight>
+                            {item._embedded['author'][0].name}
+                          </CardNameLight>
+                          {item._embedded['author'][0].acf.verified ===
+                          'yes' ? (
+                            <VerifiedSeal />
+                          ) : (
+                            <View />
+                          )}
+                        </>
+                      )}
+                    </CardProfile>
+                    <CommentBubble />
+                  </CardFooter>
+                </TouchableOpacity>
               </Card>
             </View>
           )}

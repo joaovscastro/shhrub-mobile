@@ -3,33 +3,23 @@ import { connect } from 'react-redux';
 import {
   SafeAreaView,
   View,
-  Dimensions,
   FlatList,
   ActivityIndicator,
+  TouchableOpacity,
   Text,
 } from 'react-native';
-import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
+import HTML from 'react-native-render-html';
+import { IGNORED_TAGS } from 'react-native-render-html/src/HTMLUtils';
+import Lottie from 'lottie-react-native';
 
 import api from '../../services/api';
 
-import {
-  Container,
-  Header,
-  Title,
-  NewPostButton,
-  NewPostTitle,
-  MessageBox,
-  MessageAvatar,
-  MessageContent,
-  Disclaimer,
-  DisclaimerText,
-} from './styles';
+import { Container, Header, Title, MessageBox, MessageContent } from './styles';
 
-import ArrowRightGray from '../../components/icons/ArrowRightGray';
-import MessageIcon from '../../components/icons/MessageIcon';
-import AvatarTeste from '../../../assets/img/avatar-teste.png';
+import ArrowBigLeftDark from '../../components/icons/ArrowBigLeftDark';
+import Calmo from '../../../assets/animation/calmo.json';
 
-function Message({ navigation, profile }) {
+function Activity({ navigation, profile }) {
   const [loading, Setloading] = useState(false);
   const [noticias, Setnoticias] = useState([]);
   const [page, Setpage] = useState(1);
@@ -42,33 +32,24 @@ function Message({ navigation, profile }) {
     Setloading(true);
 
     const responseNoticias = await api.get(
-      `/buddypress/v1/messages?page=${pageNumber}&per_page=10`
+      `/wp/v2/comments?author=${profile.id}&page=${pageNumber}&_embed`
     );
 
     const totalItems = responseNoticias.headers['x-wp-totalpages'];
 
     Settotal(totalItems);
 
-    const data = responseNoticias.data.map((posts) => ({
-      ...posts,
-      dateFormatted: Object.keys(posts.recipients),
-    }));
-
-    Setnoticias(shouldRefresh ? data : [...noticias, ...data]);
+    Setnoticias(
+      shouldRefresh
+        ? responseNoticias.data
+        : [...noticias, ...responseNoticias.data]
+    );
     Setpage(pageNumber + 1);
     Setloading(false);
   }
 
   useEffect(() => {
     loadPosts();
-    const navFocusListener = navigation.addListener('didFocus', () => {
-      // API_CALL();
-      loadPosts();
-    });
-
-    return () => {
-      navFocusListener.remove();
-    };
   }, []);
 
   async function refreshList() {
@@ -79,41 +60,25 @@ function Message({ navigation, profile }) {
     Setrefreshing(false);
   }
 
-  handleNavigateMessage = (messagesingle) => {
-    navigation.push('MessageSingle', { messagesingle });
+  handleNavigateActivityPost = (postsingle) => {
+    navigation.push('PostSingleActivity', { postsingle });
   };
-
-  handleNavigateFriends = () => {
-    navigation.push('Friends');
-  };
-
-  const HeaderList = (
-    <Disclaimer>
-      <DisclaimerText>
-        Sua nova conversa aparecerá somente quando seu amigo responder pela
-        primeira vez.
-      </DisclaimerText>
-    </Disclaimer>
-  );
 
   return (
     <Container>
       <SafeAreaView style={{ flex: 1 }}>
         <Header>
-          <Title>Mural</Title>
-          <NewPostButton onPress={() => handleNavigateFriends()}>
-            <NewPostTitle>Amigos</NewPostTitle>
-          </NewPostButton>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <ArrowBigLeftDark />
+          </TouchableOpacity>
+          <Title>Atividades</Title>
         </Header>
         <FlatList
           style={{ marginBottom: 0 }}
           data={noticias}
           keyExtractor={(post) => String(post.id)}
-          onEndReached={() => loadPosts()}
-          onEndReachedThreshold={0.1}
           onRefresh={refreshList}
           refreshing={refreshing}
-          ListHeaderComponent={HeaderList}
           ListFooterComponent={
             loading && (
               <View>
@@ -124,16 +89,28 @@ function Message({ navigation, profile }) {
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <View>
-              <MessageBox onPress={() => handleNavigateMessage(item)}>
-                <MessageAvatar
-                  source={{
-                    uri:
-                      item.recipients[item.last_sender_id].user_avatars.thumb,
-                  }}
-                />
-
-                <MessageContent>{item.excerpt.rendered}</MessageContent>
-                <ArrowRightGray />
+              <MessageBox onPress={() => handleNavigateActivityPost(item)}>
+                <View>
+                  <MessageContent>Você comentou em:</MessageContent>
+                  <HTML
+                    ignoredTags={[
+                      ...IGNORED_TAGS,
+                      'img',
+                      'iframe',
+                      'script',
+                      'span',
+                    ]}
+                    tagsStyles={{
+                      p: {
+                        fontFamily: 'SF Pro Text',
+                        fontWeight: 'normal',
+                        color: '#ffffff',
+                        fontSize: 12,
+                      },
+                    }}
+                    html={item._embedded['up'][0].excerpt.rendered}
+                  />
+                </View>
               </MessageBox>
             </View>
           )}
@@ -146,17 +123,26 @@ function Message({ navigation, profile }) {
                   marginBottom: 20,
                 }}
               >
-                <MessageIcon />
+                <Lottie
+                  resizeMode="contain"
+                  autoSize
+                  source={Calmo}
+                  autoPlay
+                  loop={true}
+                  style={{
+                    width: 360,
+                    height: 128,
+                  }}
+                />
                 <Text
                   style={{
                     color: '#fff',
                     fontFamily: 'SF Pro Text',
                     fontWeight: 'normal',
                     fontSize: 14,
-                    marginTop: 10,
                   }}
                 >
-                  Nenhuma mensagem
+                  Está tudo tão calmo por aqui...
                 </Text>
               </View>
             </>
@@ -171,4 +157,4 @@ const mapStateToProps = (state) => ({
   profile: state.user.profile,
 });
 
-export default connect(mapStateToProps)(Message);
+export default connect(mapStateToProps)(Activity);
