@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
 import { NavigationActions, StackActions } from 'react-navigation';
 import {
   SafeAreaView,
@@ -38,7 +39,7 @@ import IconSearch from '../../components/icons/IconSearch';
 import CommentBubble from '../../components/icons/CommentBubble';
 import VerifiedSeal from '../../components/icons/VerifiedSeal';
 
-export default function Search({ navigation }) {
+function Search({ navigation, profile, sensitive }) {
   const [loading, Setloading] = useState(false);
   const [pesquisa, Setpesquisa] = useState('');
   const [posts, Setposts] = useState([]);
@@ -52,7 +53,7 @@ export default function Search({ navigation }) {
     Setloading(true);
 
     const responseNoticias = await api.get(
-      `/wp/v2/posts?search=${pesquisa}&_embed`
+      `/wp/v2/posts?search=${pesquisa}&_embed&author_exclude=${profile.meta.last_name}&categories_exclude=${sensitive.tame}`
     );
 
     if (responseNoticias.data.length === 0) {
@@ -83,7 +84,7 @@ export default function Search({ navigation }) {
   }
 
   handleNavigatePostSearch = (postsingle) => {
-    navigation.push('PostSingle', { postsingle });
+    navigation.push('PostSingle', { postsingle, rota: 'Search' });
   };
 
   return (
@@ -204,3 +205,10 @@ export default function Search({ navigation }) {
     </Container>
   );
 }
+
+const mapStateToProps = (state) => ({
+  profile: state.user.profile,
+  sensitive: state.user.sensitivecontent,
+});
+
+export default connect(mapStateToProps)(Search);

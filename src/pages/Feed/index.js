@@ -52,8 +52,9 @@ import {
 import Close from '../../components/icons/Close';
 import CommentBubble from '../../components/icons/CommentBubble';
 import VerifiedSeal from '../../components/icons/VerifiedSeal';
+import FilterIcon from '../../components/icons/FilterIcon';
 
-function Feed({ navigation, profile }) {
+function Feed({ navigation, profile, sensitive }) {
   const [loading, Setloading] = useState(false);
   const [noticias, Setnoticias] = useState([]);
   const [page, Setpage] = useState(1);
@@ -75,7 +76,7 @@ function Feed({ navigation, profile }) {
     Setloading(true);
 
     const responseNoticias = await api.get(
-      `wp/v2/posts?page=${pageNumber}&per_page=5&categories=1&_embed`
+      `wp/v2/posts?page=${pageNumber}&per_page=5&categories=1&_embed&author_exclude=${profile.meta.last_name}&categories_exclude=${sensitive.tame}`
     );
 
     const totalItems = responseNoticias.headers['x-wp-totalpages'];
@@ -112,7 +113,11 @@ function Feed({ navigation, profile }) {
   };
 
   handleNavigatePost = (postsingle) => {
-    navigation.push('PostSingle', { postsingle });
+    navigation.push('PostSingle', { postsingle, rota: 'Feed' });
+  };
+
+  handleNavigateFilter = () => {
+    navigation.push('FilterContent');
   };
 
   function borraMeuNome() {
@@ -137,7 +142,7 @@ function Feed({ navigation, profile }) {
       });
 
       const responsePosts = await api.get(
-        `wp/v2/posts?page=1&per_page=5&categories=1&_embed`
+        `wp/v2/posts?page=1&per_page=5&categories=1&_embed&author_exclude=${profile.meta.last_name}&categories_exclude=${sensitive.tame}`
       );
 
       Setnoticias(responsePosts.data);
@@ -163,6 +168,11 @@ function Feed({ navigation, profile }) {
           <NewPostButton onPress={() => toggleModalOpen2()}>
             <NewPostTitle>Novo post</NewPostTitle>
           </NewPostButton>
+          <TouchableOpacity onPress={() => handleNavigateFilter()}>
+            <View style={{ marginLeft: 10 }}>
+              <FilterIcon />
+            </View>
+          </TouchableOpacity>
         </Header>
         <FlatList
           style={{ marginBottom: 0 }}
@@ -388,6 +398,7 @@ function Feed({ navigation, profile }) {
 
 const mapStateToProps = (state) => ({
   profile: state.user.profile,
+  sensitive: state.user.sensitivecontent,
 });
 
 export default connect(mapStateToProps)(Feed);

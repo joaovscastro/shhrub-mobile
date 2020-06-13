@@ -44,7 +44,7 @@ function CompleteProfile({ profile, navigation }) {
   const [avatarupload, SetAvatarupload] = useState(profile.m_avatar);
 
   const [nome, Setnome] = useState('');
-  const [instagram, Setinstagram] = useState('');
+  const [instagram, Setinstagram] = useState('https://instagram.com/');
   const [biografia, Setbiografia] = useState('');
   const [nascimento, Setnascimento] = useState('');
 
@@ -89,7 +89,6 @@ function CompleteProfile({ profile, navigation }) {
         avatarupload,
         avatarsource,
         instagram,
-        biografia,
       })
     );
   }
@@ -120,23 +119,14 @@ function CompleteProfile({ profile, navigation }) {
               placeholder="Digite seu nome"
             />
 
-            <Label>Bio</Label>
-            <EmailInput
-              keyboardType="default"
-              autoCorrect={false}
-              autoCapitalize="none"
-              value={biografia}
-              onChangeText={Setbiografia}
-              placeholder="Fale um pouco de você (ou não)"
-            />
-            <Label>Diga ai seu insta</Label>
+            <Label>URL do seu Instagram</Label>
             <EmailInput
               keyboardType="default"
               autoCorrect={false}
               autoCapitalize="none"
               value={instagram}
               onChangeText={Setinstagram}
-              placeholder="Somente o usuário sem @"
+              placeholder="link do seu insta"
             />
             <Label>Data de nascimento</Label>
             <DateInput

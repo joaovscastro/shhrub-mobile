@@ -254,3 +254,36 @@ export const BioText = styled.Text.attrs({
   font-size: 13px;
   margin: 5px 0;
 `;
+
+export const ReportTitle = styled.Text`
+  font-family: 'SF Pro Text';
+  font-weight: normal;
+  color: #ffffff;
+  font-size: 14px;
+  margin: 10px 0;
+`;
+
+export const ReportTitleThree = styled.Text`
+  font-family: 'SF Pro Text';
+  font-weight: normal;
+  color: #e74c3c;
+  font-size: 14px;
+  margin: 10px 0;
+`;
+
+export const ReportTitleTwo = styled.Text`
+  font-family: 'SF Pro Text';
+  font-weight: normal;
+  color: #fff;
+  font-size: 14px;
+  margin: 10px 0;
+  opacity: 0.5;
+`;
+
+export const NewReportTitle = styled.Text`
+  flex: 1;
+  font-family: 'SF Pro Text';
+  font-weight: bold;
+  color: #fff;
+  font-size: 16px;
+`;

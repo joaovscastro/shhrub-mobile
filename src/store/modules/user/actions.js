@@ -17,3 +17,17 @@ export function updateProfileFailure() {
     type: '@user/UPDATE_PROFILE_FAILURE',
   };
 }
+
+export function updateSensitiveRequest(data) {
+  return {
+    type: '@user/UPDATE_SENSITIVE_REQUEST',
+    payload: { data },
+  };
+}
+
+export function updateSensitive(data) {
+  return {
+    type: '@user/UPDATE_SENSITIVE',
+    payload: data,
+  };
+}

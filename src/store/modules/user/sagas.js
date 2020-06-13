@@ -3,7 +3,11 @@ import { takeLatest, call, put, all } from 'redux-saga/effects';
 
 import api from '../../../services/api';
 
-import { updateProfileSuccess, updateProfileFailure } from './actions';
+import {
+  updateProfileSuccess,
+  updateProfileFailure,
+  updateSensitive,
+} from './actions';
 
 export function* updateProfile({ payload }) {
   try {
@@ -31,7 +35,7 @@ export function* updateProfile({ payload }) {
         description: nome,
         first_name: nome,
         last_name: biografia,
-        url: `instagram.com/${instagram}`,
+        url: instagram,
       });
 
       yield put(updateProfileSuccess(response.data));
@@ -44,7 +48,7 @@ export function* updateProfile({ payload }) {
       first_name: nome,
       last_name: biografia,
       password: password,
-      url: `instagram.com/${instagram}`,
+      url: instagram,
     });
 
     yield put(updateProfileSuccess(response.data));
@@ -57,4 +61,13 @@ export function* updateProfile({ payload }) {
   }
 }
 
-export default all([takeLatest('@user/UPDATE_PROFILE_REQUEST', updateProfile)]);
+export function* updateSensitiveUpdate({ payload }) {
+  const tame = payload.data;
+
+  yield put(updateSensitive(tame));
+}
+
+export default all(
+  [takeLatest('@user/UPDATE_PROFILE_REQUEST', updateProfile)],
+  [takeLatest('@user/UPDATE_SENSITIVE', updateSensitiveUpdate)]
+);

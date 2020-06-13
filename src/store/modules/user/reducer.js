@@ -4,6 +4,8 @@ const INITIAL_STATE = {
   profile: null,
   loading: false,
   profilenav: false,
+  sensitivecontent: '',
+  load: false,
 };
 
 export default function user(state = INITIAL_STATE, action) {
@@ -27,6 +29,14 @@ export default function user(state = INITIAL_STATE, action) {
         draft.profile = null;
         draft.loading = false;
         draft.profilenav = false;
+        break;
+      }
+      case '@user/UPDATE_SENSITIVE_REQUEST': {
+        draft.load = true;
+        break;
+      }
+      case '@user/UPDATE_SENSITIVE': {
+        draft.sensitivecontent = action.payload;
         break;
       }
       default:

@@ -13,6 +13,7 @@ import {
 import Modal from 'react-native-modal';
 
 import { signInRequest } from '../../store/modules/auth/actions';
+import { updateSensitive } from '../../store/modules/user/actions';
 
 import api from '../../services/api';
 
@@ -53,6 +54,11 @@ export default function Login({ navigation }) {
 
   function handleSubmit() {
     dispatch(signInRequest(username, password));
+    dispatch(
+      updateSensitive({
+        tame: '',
+      })
+    );
   }
 
   toggleModalOpen = () => {

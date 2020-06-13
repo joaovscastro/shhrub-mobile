@@ -71,7 +71,6 @@ function EditProfile({ profile, navigation }) {
         avatarupload,
         avatarsource,
         password,
-        biografia: bio,
         instagram: insta,
       })
     );
@@ -106,15 +105,6 @@ function EditProfile({ profile, navigation }) {
               placeholder="Digite seu nome"
             />
 
-            <Label>Bio</Label>
-            <EmailInput
-              keyboardType="default"
-              autoCorrect={false}
-              autoCapitalize="none"
-              value={bio}
-              onChangeText={Setbio}
-              placeholder="Fale um pouco de você (ou não)"
-            />
             <Label>Diga ai seu insta</Label>
             <EmailInput
               keyboardType="default"
@@ -122,7 +112,7 @@ function EditProfile({ profile, navigation }) {
               autoCapitalize="none"
               value={insta}
               onChangeText={Setinsta}
-              placeholder="Usuário sem o @"
+              placeholder="Lsink do seu insta"
             />
             <Disclaimer>
               Deixe os campos abaixo em branco para não atualizar.

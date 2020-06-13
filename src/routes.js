@@ -19,6 +19,7 @@ import EditProfile from './pages/EditProfile';
 import More from './pages/More';
 import Activity from './pages/Activity';
 import PostSingleActivity from './pages/PostSingleActivity';
+import FilterContent from './pages/FilterContent';
 
 import Main from './pages/Main';
 import Login from './pages/Login';
@@ -48,6 +49,7 @@ export default (isSigned = false) =>
                   Feed,
                   PostSingle,
                   PublicProfile,
+                  FilterContent,
                 },
                 {
                   headerMode: 'none',
@@ -115,6 +117,7 @@ export default (isSigned = false) =>
                   GroupSingle,
                   PostSingle,
                   PublicProfile,
+                  FilterContent,
                 },
                 {
                   headerMode: 'none',

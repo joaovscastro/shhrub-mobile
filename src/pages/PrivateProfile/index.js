@@ -179,7 +179,6 @@ function PrivateProfile({ profile, navigation }) {
               <ProfileName>{profile.name}</ProfileName>
               {profile.acf.verified === 'yes' ? <VerifiedSeal /> : <View />}
             </ProfileNameBox>
-            <BioText>{profile.last_name}</BioText>
             <ProfileButtonsBox>
               <InstaButton onPress={() => Linking.openURL(profile.url)}>
                 <InstaIcon source={Insta} />

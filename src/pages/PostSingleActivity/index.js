@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { connect, useDispatch } from 'react-redux';
 import {
   View,
   ScrollView,
@@ -42,10 +43,9 @@ import ArrowBigLeft from '../../components/icons/ArrowBigLeft';
 import VerifiedSeal from '../../components/icons/VerifiedSeal';
 import Calmo from '../../../assets/animation/calmo.json';
 
-export default function PostSingleActivity({ navigation }) {
+function PostSingleActivity({ navigation, profile }) {
   // Buscar notícia props
   const postsingle = navigation.getParam('postsingle');
-
   // Carregar comentários
   const [loading, Setloading] = useState(false);
   const [comments, Setcomments] = useState([]);
@@ -65,7 +65,7 @@ export default function PostSingleActivity({ navigation }) {
     Setloading(true);
 
     const responseComments = await api.get(
-      `wp/v2/comments?post=${postsingle._embedded['up'][0].id}&page=${pageNumber}&per_page=10&_embed`
+      `wp/v2/comments?post=${postsingle._embedded['up'][0].id}&page=${pageNumber}&per_page=10&_embed&author_exclude=${profile.meta.last_name}`
     );
 
     const totalItems = responseComments.headers['x-wp-totalpages'];
@@ -102,7 +102,7 @@ export default function PostSingleActivity({ navigation }) {
   }
 
   handleNavigateProfile = (profilesingle) => {
-    navigation.push('PublicProfile', { profilesingle });
+    navigation.push('PublicProfile', { profilesingle, rota: 'PrivateProfile' });
   };
 
   async function postComment() {
@@ -110,7 +110,7 @@ export default function PostSingleActivity({ navigation }) {
     try {
       await api.post('wp/v2/comments', {
         content: comment,
-        post: postsingle.id,
+        post: postsingle._embedded['up'][0].id,
       });
       await letEstado();
       setisModalVisible(false);
@@ -137,7 +137,7 @@ export default function PostSingleActivity({ navigation }) {
 
   async function letEstado() {
     const responseComments = await api.get(
-      `wp/v2/comments?post=${postsingle._embedded['up'][0].id}&page=1&per_page=10&_embed`
+      `wp/v2/comments?post=${postsingle._embedded['up'][0].id}&page=1&per_page=10&_embed&author_exclude=${profile.meta.last_name}`
     );
 
     Setcomments(responseComments.data);
@@ -170,31 +170,7 @@ export default function PostSingleActivity({ navigation }) {
           }}
           html={postsingle._embedded['up'][0].excerpt.rendered}
         />
-        <CardFooter>
-          <CardProfile>
-            {postsingle.format === 'quote' ? (
-              <BorraTrue>
-                <BorraTitleTrue>Nome borrado</BorraTitleTrue>
-              </BorraTrue>
-            ) : (
-              <>
-                <ProfileAvatar
-                  source={{
-                    uri: postsingle._embedded['author'][0].avatar_urls[48],
-                  }}
-                />
-                <CardNameLight>
-                  {postsingle._embedded['author'][0].name}
-                </CardNameLight>
-                {postsingle._embedded['author'][0].acf.verified === 'yes' ? (
-                  <VerifiedSeal />
-                ) : (
-                  <View />
-                )}
-              </>
-            )}
-          </CardProfile>
-        </CardFooter>
+        <CardFooter></CardFooter>
       </Card>
       <NewComent>
         <NewComentTitle>Comentários ({comments.length})</NewComentTitle>
@@ -339,3 +315,9 @@ export default function PostSingleActivity({ navigation }) {
     </>
   );
 }
+
+const mapStateToProps = (state) => ({
+  profile: state.user.profile,
+});
+
+export default connect(mapStateToProps)(PostSingleActivity);

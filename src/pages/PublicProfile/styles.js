@@ -228,3 +228,44 @@ export const MessageContent = styled.Text.attrs({
   font-size: 14px;
   margin: 0 10px;
 `;
+
+export const NewComentBox = styled.KeyboardAvoidingView.attrs({
+  enabled: Platform.OS === 'ios',
+  behavior: 'padding',
+})`
+  padding: 20px;
+  background-color: #22272e;
+`;
+
+export const ReportTitle = styled.Text`
+  font-family: 'SF Pro Text';
+  font-weight: normal;
+  color: #ffffff;
+  font-size: 14px;
+  margin: 10px 0;
+`;
+
+export const ReportTitleThree = styled.Text`
+  font-family: 'SF Pro Text';
+  font-weight: normal;
+  color: #e74c3c;
+  font-size: 14px;
+  margin: 10px 0;
+`;
+
+export const ReportTitleTwo = styled.Text`
+  font-family: 'SF Pro Text';
+  font-weight: normal;
+  color: #fff;
+  font-size: 14px;
+  margin: 10px 0;
+  opacity: 0.5;
+`;
+
+export const NewReportTitle = styled.Text`
+  flex: 1;
+  font-family: 'SF Pro Text';
+  font-weight: bold;
+  color: #fff;
+  font-size: 16px;
+`;

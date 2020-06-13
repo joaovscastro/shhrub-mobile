@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { connect, useDispatch } from 'react-redux';
+import { StackActions, NavigationActions } from 'react-navigation';
 import {
   View,
   ScrollView,
@@ -15,6 +17,8 @@ import HTML from 'react-native-render-html';
 import { IGNORED_TAGS } from 'react-native-render-html/src/HTMLUtils';
 import Modal from 'react-native-modal';
 import Lottie from 'lottie-react-native';
+
+import { updateProfileRequest } from '../../store/modules/user/actions';
 
 import api from '../../services/api';
 
@@ -39,15 +43,21 @@ import {
   InputComent,
   BorraTrue,
   BorraTitleTrue,
+  ReportTitle,
+  ReportTitleTwo,
+  NewReportTitle,
+  ReportTitleThree,
 } from './styles';
 
 import ArrowBigLeft from '../../components/icons/ArrowBigLeft';
 import VerifiedSeal from '../../components/icons/VerifiedSeal';
+import ReportIcon from '../../components/icons/ReportIcon';
 import Calmo from '../../../assets/animation/calmo.json';
 
-export default function PostSingle({ navigation }) {
+function PostSingle({ navigation, profile }) {
   // Buscar notícia props
   const postsingle = navigation.getParam('postsingle');
+  const rota = navigation.getParam('rota');
 
   // Carregar comentários
   const [loading, Setloading] = useState(false);
@@ -56,8 +66,14 @@ export default function PostSingle({ navigation }) {
   const [total, Settotal] = useState(0);
   const [refreshing, Setrefreshing] = useState(false);
 
+  const [loadingreport, Setloadingreport] = useState(false);
+
   // Modal
   const [isModalVisible, setisModalVisible] = useState(false);
+
+  // Modal
+  const [isModalVisibleReport, setisModalVisibleReport] = useState(false);
+  const [bio, Setbio] = useState();
 
   const [comment, Setcomment] = useState('');
   const [loadpost, Setloadpost] = useState(false);
@@ -68,7 +84,7 @@ export default function PostSingle({ navigation }) {
     Setloading(true);
 
     const responseComments = await api.get(
-      `wp/v2/comments?post=${postsingle.id}&page=${pageNumber}&per_page=10&_embed`
+      `wp/v2/comments?post=${postsingle.id}&page=${pageNumber}&per_page=10&_embed&author_exclude=${profile.meta.last_name}`
     );
 
     const totalItems = responseComments.headers['x-wp-totalpages'];
@@ -105,11 +121,11 @@ export default function PostSingle({ navigation }) {
   }
 
   handleNavigateProfile = (profilesingle) => {
-    navigation.push('PublicProfile', { profilesingle });
+    navigation.push('PublicProfile', { profilesingle, rota: rota });
   };
 
   handleNavigateProfileCard = (profilesingle) => {
-    navigation.push('PublicProfile', { profilesingle });
+    navigation.push('PublicProfile', { profilesingle, rota: rota });
   };
 
   async function postComment() {
@@ -135,6 +151,7 @@ export default function PostSingle({ navigation }) {
   }
 
   toggleModalOpen = () => {
+    setisModalVisibleReport(false);
     setisModalVisible(true);
   };
 
@@ -142,23 +159,108 @@ export default function PostSingle({ navigation }) {
     setisModalVisible(false);
   };
 
+  toggleModalOpenReport = () => {
+    setisModalVisible(false);
+    setisModalVisibleReport(true);
+  };
+
+  toggleModalReport = () => {
+    setisModalVisibleReport(false);
+  };
+
   async function letEstado() {
     const responseComments = await api.get(
-      `wp/v2/comments?post=${postsingle.id}&page=1&per_page=10&_embed`
+      `wp/v2/comments?post=${postsingle.id}&page=1&per_page=10&_embed&author_exclude=${profile.meta.last_name}`
     );
 
     Setcomments(responseComments.data);
   }
 
+  async function resportPost(motivo) {
+    Setloadingreport(true);
+    try {
+      await api.post('/wp/v2/denuncia', {
+        title: 'Nova denúncia',
+        content: `Usuário de ID ${profile.id} denunciou o post de ID ${postsingle.id} por motivos de ${motivo}`,
+        status: 'publish',
+      });
+      Alert.alert(
+        'Denuncia envidada',
+        'Obrigado!',
+        [{ text: 'Ok', onPress: () => navigation.goBack() }],
+        { cancelable: false }
+      );
+    } catch (err) {
+      Alert.alert('Ops..', 'Houve algum erro, tente novamente.');
+    }
+    Setloadingreport(false);
+  }
+
+  const dispatch = useDispatch();
+
+  function bloquearUser() {
+    Alert.alert(
+      'Deseja realmente bloquear esse usuário?',
+      'Essa ação não pode ser desfeita.',
+      [{ text: 'Não' }, { text: 'Sim', onPress: () => reportUserRequest() }],
+      { cancelable: false }
+    );
+  }
+
+  function reportUserRequest() {
+    dispatch(
+      updateProfileRequest({
+        id: profile.id,
+        biografia: `${profile.meta.last_name},${postsingle.author}`,
+        instagram: profile.url,
+      })
+    );
+    Alert.alert(
+      'Usuário bloqueado',
+      'Você não verá mais conteúdo desse usuário.',
+      [{ text: 'Ok', onPress: () => reportUser() }],
+      { cancelable: false }
+    );
+  }
+
+  function reportUser() {
+    setisModalVisibleReport(false);
+    const resetAction = StackActions.reset({
+      index: 0,
+      actions: [NavigationActions.navigate({ routeName: rota })],
+    });
+    navigation.dispatch(resetAction);
+  }
+
   const HeaderList = (
     <View>
       <Card style={{ backgroundColor: postsingle.title.rendered }}>
-        <TouchableOpacity
-          style={{ marginBottom: 20 }}
-          onPress={() => navigation.goBack()}
-        >
-          <ArrowBigLeft />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            style={{ marginBottom: 20, flex: 1 }}
+            onPress={() => navigation.goBack()}
+          >
+            <ArrowBigLeft />
+          </TouchableOpacity>
+          {profile.id === postsingle.author ? (
+            <View />
+          ) : (
+            <>
+              {loadingreport ? (
+                <View style={{ marginBottom: 20 }}>
+                  <ActivityIndicator color="#000" size={25} />
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={{ marginBottom: 20 }}
+                  onPress={() => toggleModalOpenReport()}
+                >
+                  <ReportIcon />
+                </TouchableOpacity>
+              )}
+            </>
+          )}
+        </View>
 
         <HTML
           ignoredTags={[...IGNORED_TAGS, 'img', 'iframe', 'script', 'span']}
@@ -174,24 +276,29 @@ export default function PostSingle({ navigation }) {
           html={postsingle.content.rendered}
         />
         <CardFooter>
-          <CardProfile onPress={() => handleNavigateProfileCard(postsingle)}>
+          <CardProfile>
             {postsingle.format === 'quote' ? (
               <BorraTrue>
                 <BorraTitleTrue>Nome borrado</BorraTitleTrue>
               </BorraTrue>
             ) : (
               <>
-                <ProfileAvatar
-                  source={{ uri: postsingle._embedded['author'][0].m_avatar }}
-                />
-                <CardNameLight>
-                  {postsingle._embedded['author'][0].name}
-                </CardNameLight>
-                {postsingle._embedded['author'][0].acf.verified === 'yes' ? (
-                  <VerifiedSeal />
-                ) : (
-                  <View />
-                )}
+                <TouchableOpacity
+                  style={{ flexDirection: 'row' }}
+                  onPress={() => handleNavigateProfileCard(postsingle)}
+                >
+                  <ProfileAvatar
+                    source={{ uri: postsingle._embedded['author'][0].m_avatar }}
+                  />
+                  <CardNameLight>
+                    {postsingle._embedded['author'][0].name}
+                  </CardNameLight>
+                  {postsingle._embedded['author'][0].acf.verified === 'yes' ? (
+                    <VerifiedSeal />
+                  ) : (
+                    <View />
+                  )}
+                </TouchableOpacity>
               </>
             )}
           </CardProfile>
@@ -337,6 +444,63 @@ export default function PostSingle({ navigation }) {
           </ScrollView>
         </NewComentBox>
       </Modal>
+      <Modal
+        isVisible={isModalVisibleReport}
+        onBackdropPress={() => toggleModalReport()}
+        style={{
+          justifyContent: 'flex-end',
+          margin: 0,
+        }}
+      >
+        <NewComentBox style={{ paddingBottom: 50 }}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <NewReportTitle>Denunciar</NewReportTitle>
+            <ReportTitleTwo>Nos ajude a entender melhor</ReportTitleTwo>
+            {loadingreport ? (
+              <ActivityIndicator color="#ffffff" size={25} />
+            ) : (
+              <>
+                <TouchableOpacity onPress={() => bloquearUser()}>
+                  <ReportTitleThree>Bloquear usuário</ReportTitleThree>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => resportPost('Nudez ou atividade sexual')}
+                >
+                  <ReportTitle>Nudez ou atividade sexual</ReportTitle>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => resportPost('Discurso de ódio')}
+                >
+                  <ReportTitle>Discurso de ódio</ReportTitle>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => resportPost('Bullyng ou assédio')}
+                >
+                  <ReportTitle>Bullyng ou assédio</ReportTitle>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() =>
+                    resportPost('Violação de propriedade intelectual')
+                  }
+                >
+                  <ReportTitle>Violação de propriedade intelectual</ReportTitle>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => resportPost('Suicídio')}>
+                  <ReportTitle>Suicídio</ReportTitle>
+                </TouchableOpacity>
+              </>
+            )}
+
+            <View style={{ marginBottom: 80 }} />
+          </ScrollView>
+        </NewComentBox>
+      </Modal>
     </>
   );
 }
+
+const mapStateToProps = (state) => ({
+  profile: state.user.profile,
+});
+
+export default connect(mapStateToProps)(PostSingle);

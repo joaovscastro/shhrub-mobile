@@ -53,8 +53,9 @@ import Close from '../../components/icons/Close';
 import CommentBubble from '../../components/icons/CommentBubble';
 import VerifiedSeal from '../../components/icons/VerifiedSeal';
 import ArrowBigLeftDark from '../../components/icons/ArrowBigLeftDark';
+import FilterIcon from '../../components/icons/FilterIcon';
 
-function GroupSingle({ navigation, profile }) {
+function GroupSingle({ navigation, profile, sensitive }) {
   const groupId = navigation.getParam('idgroup');
   const groupName = navigation.getParam('groupname');
 
@@ -79,7 +80,7 @@ function GroupSingle({ navigation, profile }) {
     Setloading(true);
 
     const responseNoticias = await api.get(
-      `wp/v2/posts?page=${pageNumber}&per_page=5&categories=${groupId}&_embed`
+      `wp/v2/posts?page=${pageNumber}&per_page=5&categories=${groupId}&_embed&author_exclude=${profile.meta.last_name}&categories_exclude=${sensitive.tame}`
     );
 
     const totalItems = responseNoticias.headers['x-wp-totalpages'];
@@ -116,7 +117,11 @@ function GroupSingle({ navigation, profile }) {
   };
 
   handleNavigatePostGroup = (postsingle) => {
-    navigation.push('PostSingle', { postsingle });
+    navigation.push('PostSingle', { postsingle, rota: 'Groups' });
+  };
+
+  handleNavigateFilterGroup = () => {
+    navigation.push('FilterContent');
   };
 
   function borraMeuNome() {
@@ -142,7 +147,7 @@ function GroupSingle({ navigation, profile }) {
       });
 
       const responsePosts = await api.get(
-        `wp/v2/posts?page=1&per_page=5&categories=${groupId}&_embed`
+        `wp/v2/posts?page=1&per_page=5&categories=${groupId}&_embed&author_exclude=${profile.meta.last_name}&categories_exclude=${sensitive.tame}`
       );
 
       Setnoticias(responsePosts.data);
@@ -171,6 +176,11 @@ function GroupSingle({ navigation, profile }) {
           <NewPostButton onPress={() => toggleModalOpenGroup()}>
             <NewPostTitle>Novo post</NewPostTitle>
           </NewPostButton>
+          <TouchableOpacity onPress={() => handleNavigateFilterGroup()}>
+            <View style={{ marginLeft: 10 }}>
+              <FilterIcon />
+            </View>
+          </TouchableOpacity>
         </Header>
         <FlatList
           style={{ marginBottom: 0 }}
@@ -396,6 +406,7 @@ function GroupSingle({ navigation, profile }) {
 
 const mapStateToProps = (state) => ({
   profile: state.user.profile,
+  sensitive: state.user.sensitivecontent,
 });
 
 export default connect(mapStateToProps)(GroupSingle);
